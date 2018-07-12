@@ -4,8 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class MainMan : MonoBehaviour {
+    [Header("Player Settings")]
+    public int DrawDis = 10;
     [Header("GO's")]
     public GameObject Player;
+    public List<GameObject> PreFabsForWorldGen;
     [Header("UI stuff")]
     public List<GameObject> ListOfHp;
     public List<GameObject> ListOfMana;
@@ -19,15 +22,15 @@ public class MainMan : MonoBehaviour {
     public float Amp;
     public int MegaAmp;
     public Material DefMat;
-    [Header("DEV")]
+    public List<Material> WorldMats;
     public List<Vector3> BlockData;
-    public int DrawDis = 10;
-    public List<GameObject> Chunks;
+    public List<Vector3> UnderGroundBlockData;
+    [Header("Biome mods")]
+    public int ChanceOfTrees = 1;
+    [Header("DEV")]
     public int AddedDataCount = 0;
     
-    
-    // I know there is a block at
-    // 2.4, 6.4, 1.2
+
 
     void UpdateHpBar()
     {
@@ -343,7 +346,7 @@ public class MainMan : MonoBehaviour {
             ListOfMana[0].SetActive(true); // 0
         }
     }
-    void DrawBlocks() // WIP
+    void DrawBlocks() // Out of date
     {
        
         /*if (BlockData.Contains(new Vector3(Mathf.RoundToInt(Player.transform.position.x), Mathf.RoundToInt(Player.transform.position.y), Mathf.RoundToInt(Player.transform.position.z))))
@@ -416,6 +419,26 @@ public class MainMan : MonoBehaviour {
                     Cube.transform.position = new Vector3(BlockData[i].x, BlockData[i].y, BlockData[i].z);
                     Cube.GetComponent<Renderer>().material = DefMat;
                     BlockData.Remove(BlockData[i]);
+                    if(Random.Range(0,1000) < ChanceOfTrees)
+                    {
+                        // make a tree
+                        GameObject Tree = GameObject.Instantiate(PreFabsForWorldGen[0]);
+                        Tree.transform.position = new Vector3(Cube.transform.position.x, Cube.transform.position.y + 0.5f, Cube.transform.position.z);
+
+                    }
+                    // Make blocks under you
+                    Vector3 StonePos = new Vector3(Cube.transform.position.x,Cube.transform.position.y - 1,Cube.transform.position.z);
+                    while (StonePos.y != 0)
+                    {
+                        // make stone!
+                        //GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        UnderGroundBlockData.Add(StonePos);
+                        //Stone.GetComponent<Renderer>().material = WorldMats[0];
+                        //Stone.name = "Stone";
+                       StonePos = new Vector3(Cube.transform.position.x, StonePos.y - 1, Cube.transform.position.z);
+                    }
+                    
+
                 }
             }
             
@@ -448,6 +471,79 @@ public class MainMan : MonoBehaviour {
             }
         }
     }
+    public void MakeStone(Vector3 DisBlockCords)
+    {
+        int MineRad = 1;
+        //Debug.LogError("GOT THE MESSAGE BUT I AM NOT DOING SH!T");
+        // HERE we make stone! well not make it but using data from UndergroundBlockData we make blocks!
+        for (int i = 0; i < MineRad; i++)
+        {
+            // Y +
+            if ((UnderGroundBlockData.Contains(new Vector3(DisBlockCords.x, DisBlockCords.y + MineRad, DisBlockCords.z))))
+            {
+                GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Stone.GetComponent<Renderer>().material = WorldMats[0];
+                Stone.transform.name = "Stone";
+                Stone.transform.position = (new Vector3(DisBlockCords.x, DisBlockCords.y + MineRad, DisBlockCords.z));
+                UnderGroundBlockData.Remove(Stone.transform.position);
+            }
+            // X +
+            if ((UnderGroundBlockData.Contains(new Vector3(DisBlockCords.x + MineRad, DisBlockCords.y, DisBlockCords.z))))
+            {
+                GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Stone.GetComponent<Renderer>().material = WorldMats[0];
+                Stone.transform.name = "Stone";
+                Stone.transform.position = (new Vector3(DisBlockCords.x + MineRad, DisBlockCords.y, DisBlockCords.z));
+                UnderGroundBlockData.Remove(Stone.transform.position);
+            }
+            // Z +
+            if ((UnderGroundBlockData.Contains(new Vector3(DisBlockCords.x, DisBlockCords.y, DisBlockCords.z + MineRad))))
+            {
+                GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Stone.GetComponent<Renderer>().material = WorldMats[0];
+                Stone.transform.name = "Stone";
+                Stone.transform.position = (new Vector3(DisBlockCords.x, DisBlockCords.y, DisBlockCords.z + MineRad));
+                UnderGroundBlockData.Remove(Stone.transform.position);
+            }
+            // Y -
+            if ((UnderGroundBlockData.Contains(new Vector3(DisBlockCords.x, DisBlockCords.y - MineRad, DisBlockCords.z))))
+            {
+
+                GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Stone.GetComponent<Renderer>().material = WorldMats[0];
+                Stone.transform.name = "Stone";
+                Stone.transform.position = (new Vector3(DisBlockCords.x, DisBlockCords.y - MineRad, DisBlockCords.z));
+                UnderGroundBlockData.Remove(Stone.transform.position);
+            }
+            // X -
+            if ((UnderGroundBlockData.Contains(new Vector3(DisBlockCords.x - MineRad, DisBlockCords.y, DisBlockCords.z))))
+            {
+
+                GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Stone.GetComponent<Renderer>().material = WorldMats[0];
+                Stone.transform.name = "Stone";
+                Stone.transform.position = (new Vector3(DisBlockCords.x - MineRad, DisBlockCords.y, DisBlockCords.z));
+                UnderGroundBlockData.Remove(Stone.transform.position);
+            }
+            // Z -
+            if ((UnderGroundBlockData.Contains(new Vector3(DisBlockCords.x, DisBlockCords.y, DisBlockCords.z - MineRad))))
+            {
+
+                GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Stone.GetComponent<Renderer>().material = WorldMats[0];
+                Stone.transform.name = "Stone";
+                Stone.transform.position = (new Vector3(DisBlockCords.x, DisBlockCords.y, DisBlockCords.z - MineRad));
+                UnderGroundBlockData.Remove(Stone.transform.position);
+            }
+        }
+
+    }
+    public void PlaceBlock(Vector3 BlockCords)
+    {
+        GameObject NewBlock = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        NewBlock.transform.position = new Vector3(BlockCords.x, BlockCords.y+1, BlockCords.z);
+        NewBlock.GetComponent<Renderer>().material = WorldMats[1];
+    }
 
     // Use this for initialization
     void Start () {
@@ -458,7 +554,6 @@ public class MainMan : MonoBehaviour {
 	void Update () {
         UpdateHpBar();
         UpdateManaBar();
-        DrawBlocks();
         DrawBlocksV3();
 
         // right now the world has a like idk 2k block lim to help make rpg stuff

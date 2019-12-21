@@ -20,11 +20,23 @@ public class InteractScript : MonoBehaviour {
         if (Physics.Raycast(ray, out hit))
             if (hit.collider != null && hit.distance < 10 && Input.GetButtonDown("Mine"))
             {
-               // Debug.Log("HIT:" + hit.collider.name + "DIS:" + hit.distance);
+                // Debug.Log("HIT:" + hit.collider.name + "DIS:" + hit.distance);
                 // destroy it too....
-                GameObject.Destroy(hit.collider.gameObject);
-                // ask main to make stone!
-                Main.GetComponent<MainMan>().MakeStone(hit.collider.transform.position);
+                // first add it to inv
+                // add it to inv
+                Debug.Log("Player got [" + hit.collider.gameObject.name + "]");
+                if (Main.GetComponent<MainMan>().AddThingToInv(hit.collider.gameObject.name))
+                {
+                    Main.GetComponent<MainMan>().RemoveBlock(hit.collider.gameObject);
+                    GameObject.Destroy(hit.collider.gameObject); // YOU HAVE TO TELL MAIN?!!!!!
+
+                    // ask main to make stone!
+                    Main.GetComponent<MainMan>().MakeStone(hit.collider.transform.position);
+                }
+                else
+                {
+                    Debug.Log("For some odd reson main is keeping [" + hit.collider.gameObject + "] from the player");
+                }
             }
         if (hit.collider != null && hit.distance < 10 && Input.GetButtonDown("Place Block"))
         {

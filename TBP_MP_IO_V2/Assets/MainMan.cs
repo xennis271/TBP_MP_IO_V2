@@ -4,34 +4,46 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class MainMan : MonoBehaviour {
-    [Header("Player Settings")]
+    [Header("[[Player Settings]]")]
     public int DrawDis = 10;
-    [Header("GO's")]
+    [Header("[[GO]]")]
     public GameObject Player;
     public List<GameObject> PreFabsForWorldGen;
-    [Header("UI stuff")]
+    [Header("[[UI]]")]
     public List<GameObject> ListOfHp;
     public List<GameObject> ListOfMana;
+    public List<GameObject> UIGos;
+    public GameObject UIItemPreFab;
     public Slider HpBar;
     public Slider ManaBar;
-    [Header("World Gen stuff")]
+    public GameObject Items;
+    public Image PlayerSelMat;
+    public List<Sprite> WorldUI;
+    public List<string> Inv;
+    public int InvMax;
+    string LastActiveButton;
+    public List<GameObject> ActiveButtons;
+    bool InvOpen = false;
+    [Header("[[World Gen]]")]
     public int MaxX;
     public int MinX = 0;
     public int MaxZ;
     public int MinZ = 0;
     public float Amp;
     public int MegaAmp;
-    public Material DefMat;
+    public Material PlayerMat;
     public List<Material> WorldMats;
     public List<Vector3> BlockData;
     public List<Vector3> UnderGroundBlockData;
-    [Header("Biome mods")]
+    public List<GameObject> LoadedBlocks;
+    [Header("[[Biome mods]]")]
     public int ChanceOfTrees = 1;
-    [Header("DEV")]
-    public int AddedDataCount = 0;
+    //[Header("<<DEV>>")]
+    //public string ReadMe = "Nothing in Dev Right now! ;D";
+
+    // Local meth
+
     
-
-
     void UpdateHpBar()
     {
         if (HpBar.value >= 1)
@@ -346,86 +358,41 @@ public class MainMan : MonoBehaviour {
             ListOfMana[0].SetActive(true); // 0
         }
     }
-    void DrawBlocks() // Out of date
-    {
-       
-        /*if (BlockData.Contains(new Vector3(Mathf.RoundToInt(Player.transform.position.x), Mathf.RoundToInt(Player.transform.position.y), Mathf.RoundToInt(Player.transform.position.z))))
-        {
-            Debug.Log("FOUND BLOCK @ " + new Vector3(Mathf.RoundToInt(Player.transform.position.x), Mathf.RoundToInt(Player.transform.position.y), Mathf.RoundToInt(Player.transform.position.z)));
-           // GameObject Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            // Cube.transform.position = Player.transform.position;
-            //Cube.GetComponent<Renderer>().material = DefMat;
-           // Cube.name = "Chunk_" + Chunks.Count;
-            Player.transform.position = new Vector3(Mathf.RoundToInt(Player.transform.position.x), Mathf.RoundToInt(Player.transform.position.y) + 10, Mathf.RoundToInt(Player.transform.position.z));
-            
-            BlockData.Remove(new Vector3(Mathf.RoundToInt(Player.transform.position.x), Mathf.RoundToInt(Player.transform.position.y), Mathf.RoundToInt(Player.transform.position.z)));
-            Vector3 RoundedPlayer = new Vector3(Mathf.RoundToInt(Player.transform.position.x), Mathf.RoundToInt(Player.transform.position.y), Mathf.RoundToInt(Player.transform.position.z));
-            
-           // Debug.Log("[SB]" + StartBlock);
-            
-        }*/
-        /*
-        Vector3 StartBlock = new Vector3(Mathf.RoundToInt(Player.transform.position.x), Mathf.RoundToInt(Player.transform.position.y), Mathf.RoundToInt(Player.transform.position.z));
-        //Vector3 StartBlock = new Vector3(Player.transform.position.x,Player.transform.position.y,Player.transform.position.z);
-        for (float z = (StartBlock.z * -1); z < DrawDis; z += 1f)
-        {
-            for (float x =(StartBlock.x * -1); x < DrawDis; x += 1f)
-            {
-                for (float y =( StartBlock.y * -1); y < DrawDis; y += 1f)
-                {
-                    if (BlockData.Contains(new Vector3(x, y, z)))
-                    {
-                        Debug.Log("FOUND BLOCK [xbp] @ " + new Vector3(x, y, z));
-                        GameObject Cube2 = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        Cube2.transform.position = new Vector3(x, y, z);
-
-                        Cube2.GetComponent<Renderer>().material = DefMat;
-                        BlockData.Remove(new Vector3(x, y, z));
-
-                    }
-                }
-            }
-        }
-        */
-
-    }
-    void DrawblocksV2(int Min, int Max)
-    {
-        for (int x = Min; x < Max; x++)
-        {
-            for (int y = Min; y < Max; y++)
-            {
-                for (int z = Min; z < Max; z++)
-                {
-                    if (BlockData.Contains(new Vector3(x, y, z)))
-                    {
-                        GameObject Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        Cube.transform.position = new Vector3(x, y, z);
-                        BlockData.Remove(Cube.transform.position);
-                    }
-                }
-            }
-        }
-    }
-    void DrawBlocksV3()
+    void LoadBlocks()
     {
         for (int i = 0; i < BlockData.Count; i++)
         {
             for (int Draw = (DrawDis * -1); Draw < DrawDis; Draw++)
             {
-                if ((BlockData[i].x == Mathf.Round(Player.transform.position.x) + Draw || BlockData[i].z == Mathf.Round(Player.transform.position.z) + Draw ) && ((BlockData[i].x < Mathf.Round(Player.transform.position.x) + DrawDis)&& (BlockData[i].z < Mathf.Round(Player.transform.position.z) + DrawDis)))
+                //BlockData.Add(new Vector3(Mathf.RoundToInt(x), Mathf.RoundToInt((Mathf.PerlinNoise(x * Amp, z * Amp)) * MegaAmp), Mathf.RoundToInt(z)));
+
+
+                if (BlockData.Count != 0)
+                if (
+                        // I want all blocks that have a x with in +10 and -10 from me
+                        BlockData[i].x > (Player.transform.position.x -10f) &&
+                        BlockData[i].x < (Player.transform.position.x + 10f) &&
+                        BlockData[i].z > (Player.transform.position.z - 10f) &&
+                        BlockData[i].z < (Player.transform.position.z + 10f)
+                   )
                 {
                     GameObject Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     Cube.transform.position = new Vector3(BlockData[i].x, BlockData[i].y, BlockData[i].z);
-                    Cube.GetComponent<Renderer>().material = DefMat;
+                    Cube.GetComponent<Renderer>().material = WorldMats[2];
+                        Cube.transform.gameObject.name = "Grass";
                     BlockData.Remove(BlockData[i]);
-                    if(Random.Range(0,1000) < ChanceOfTrees)
+                    LoadedBlocks.Add(Cube);
+
+
+
+
+                        if (Random.Range(0,1000) < ChanceOfTrees)
                     {
                         // make a tree
                         GameObject Tree = GameObject.Instantiate(PreFabsForWorldGen[0]);
                         Tree.transform.position = new Vector3(Cube.transform.position.x, Cube.transform.position.y + 0.5f, Cube.transform.position.z);
 
-                    }
+                    } // make a tree code
                     // Make blocks under you
                     Vector3 StonePos = new Vector3(Cube.transform.position.x,Cube.transform.position.y - 1,Cube.transform.position.z);
                     while (StonePos.y != 0)
@@ -445,6 +412,30 @@ public class MainMan : MonoBehaviour {
 
         }
     }
+    void UnLoadBlocks()
+    {
+        
+        for (int i = 0; i < LoadedBlocks.Count; i++)
+        {
+            if (
+                        // I want all blocks that have a x with in +10 and -10 from me
+                        // I want all blocks that are outside of the +10/-10 range to die.
+                        !(LoadedBlocks[i].transform.position.x > (Player.transform.position.x - 10f) &&
+                        LoadedBlocks[i].transform.position.x < (Player.transform.position.x + 10f) &&
+                        LoadedBlocks[i].transform.position.z > (Player.transform.position.z - 10f) &&
+                        LoadedBlocks[i].transform.position.z < (Player.transform.position.z + 10f))
+                   )
+            {
+                // unload block
+                BlockData.Add(LoadedBlocks[i].transform.position);
+                GameObject Thing = LoadedBlocks[i];
+                LoadedBlocks.Remove(Thing);
+                GameObject.Destroy(Thing);
+                
+            }
+        }
+        
+    }
     void DelData(int Max)
     {
         for (int i = 0; i < Max; i++)
@@ -455,7 +446,6 @@ public class MainMan : MonoBehaviour {
     void AddData()
     {
         BlockData.Clear();
-        AddedDataCount++;
         for (int z = MinZ; z < MaxZ; z++)
         {
             for (int x = MinX; x < MaxX; x++)
@@ -467,10 +457,82 @@ public class MainMan : MonoBehaviour {
                 // Cube.transform.position = new Vector3(x,(Mathf.PerlinNoise(x * Amp, z * Amp)) * MegaAmp,z);
                 //Cube.name = "fakeblock";
                 //if (!BlockData.Contains(new Vector3(Mathf.RoundToInt(x), Mathf.RoundToInt((Mathf.PerlinNoise(x * Amp, z * Amp)) * MegaAmp), Mathf.RoundToInt(z))))
+                if(!BlockData.Contains(new Vector3(Mathf.RoundToInt(x), Mathf.RoundToInt((Mathf.PerlinNoise(x * Amp, z * Amp)) * MegaAmp), Mathf.RoundToInt(z))))
                 BlockData.Add(new Vector3(Mathf.RoundToInt(x), Mathf.RoundToInt((Mathf.PerlinNoise(x * Amp, z * Amp)) * MegaAmp), Mathf.RoundToInt(z)));
             }
         }
     }
+    void UpdateUI()
+    {
+        UpdateHpBar();
+        UpdateManaBar();
+        KeyCheck();
+    }
+    void KeyCheck()
+    {
+
+        if (Input.GetKeyDown("i"))
+        {
+            if (InvOpen == true)
+            {
+                // close it
+                Player.SetActive(true);
+                Items.SetActive(false);
+                InvOpen = false;
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+            else
+            {
+                // open it
+                Player.SetActive(false);
+                Items.SetActive(true);
+                InvOpen = true;
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            }
+        }
+    }
+    void SetActiveAllButtons(bool state)
+    {
+        UIGos[1].SetActive(state);
+        UIGos[2].SetActive(state);
+        UIGos[3].SetActive(state);
+        UIGos[4].SetActive(state);
+        UIGos[5].SetActive(state);
+        UIGos[6].SetActive(state);
+        UIGos[7].SetActive(state);
+        UIGos[8].SetActive(state);
+        UIGos[9].SetActive(state);
+    }
+    void ClearCraftingBg()
+    {
+        UIGos[1].transform.GetChild(0).GetComponent<Text>().text = "";
+        UIGos[2].transform.GetChild(0).GetComponent<Text>().text = "";
+        UIGos[3].transform.GetChild(0).GetComponent<Text>().text = "";
+        UIGos[4].transform.GetChild(0).GetComponent<Text>().text = "";
+        UIGos[5].transform.GetChild(0).GetComponent<Text>().text = "";
+        UIGos[6].transform.GetChild(0).GetComponent<Text>().text = "";
+        UIGos[7].transform.GetChild(0).GetComponent<Text>().text = "";
+        UIGos[8].transform.GetChild(0).GetComponent<Text>().text = "";
+        UIGos[9].transform.GetChild(0).GetComponent<Text>().text = "";
+    }
+    void Start()
+    {
+        AddData();
+        // UI booting zone
+        PlayerMat = WorldMats[0];
+
+        // end of UI booting zone
+    }
+    void Update()
+    {
+        UpdateUI(); // Keeps the UI up to date
+        LoadBlocks(); // Loads blocks into the world (just drawing the data)
+        UnLoadBlocks(); // Unloads the blocks into data [Underground is not unloaded...]
+    }
+    // Street Meth
+
     public void MakeStone(Vector3 DisBlockCords)
     {
         int MineRad = 1;
@@ -483,7 +545,7 @@ public class MainMan : MonoBehaviour {
             {
                 GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 Stone.GetComponent<Renderer>().material = WorldMats[0];
-                Stone.transform.name = "Stone";
+                Stone.transform.gameObject.name = "Stone";
                 Stone.transform.position = (new Vector3(DisBlockCords.x, DisBlockCords.y + MineRad, DisBlockCords.z));
                 UnderGroundBlockData.Remove(Stone.transform.position);
             }
@@ -492,7 +554,7 @@ public class MainMan : MonoBehaviour {
             {
                 GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 Stone.GetComponent<Renderer>().material = WorldMats[0];
-                Stone.transform.name = "Stone";
+                Stone.transform.gameObject.name = "Stone";
                 Stone.transform.position = (new Vector3(DisBlockCords.x + MineRad, DisBlockCords.y, DisBlockCords.z));
                 UnderGroundBlockData.Remove(Stone.transform.position);
             }
@@ -501,7 +563,7 @@ public class MainMan : MonoBehaviour {
             {
                 GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 Stone.GetComponent<Renderer>().material = WorldMats[0];
-                Stone.transform.name = "Stone";
+                Stone.transform.gameObject.name = "Stone";
                 Stone.transform.position = (new Vector3(DisBlockCords.x, DisBlockCords.y, DisBlockCords.z + MineRad));
                 UnderGroundBlockData.Remove(Stone.transform.position);
             }
@@ -511,7 +573,7 @@ public class MainMan : MonoBehaviour {
 
                 GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 Stone.GetComponent<Renderer>().material = WorldMats[0];
-                Stone.transform.name = "Stone";
+                Stone.transform.gameObject.name = "Stone";
                 Stone.transform.position = (new Vector3(DisBlockCords.x, DisBlockCords.y - MineRad, DisBlockCords.z));
                 UnderGroundBlockData.Remove(Stone.transform.position);
             }
@@ -521,7 +583,7 @@ public class MainMan : MonoBehaviour {
 
                 GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 Stone.GetComponent<Renderer>().material = WorldMats[0];
-                Stone.transform.name = "Stone";
+                Stone.transform.gameObject.name = "Stone";
                 Stone.transform.position = (new Vector3(DisBlockCords.x - MineRad, DisBlockCords.y, DisBlockCords.z));
                 UnderGroundBlockData.Remove(Stone.transform.position);
             }
@@ -531,7 +593,7 @@ public class MainMan : MonoBehaviour {
 
                 GameObject Stone = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 Stone.GetComponent<Renderer>().material = WorldMats[0];
-                Stone.transform.name = "Stone";
+                Stone.transform.gameObject.name = "Stone";
                 Stone.transform.position = (new Vector3(DisBlockCords.x, DisBlockCords.y, DisBlockCords.z - MineRad));
                 UnderGroundBlockData.Remove(Stone.transform.position);
             }
@@ -542,32 +604,318 @@ public class MainMan : MonoBehaviour {
     {
         GameObject NewBlock = GameObject.CreatePrimitive(PrimitiveType.Cube);
         NewBlock.transform.position = new Vector3(BlockCords.x, BlockCords.y+1, BlockCords.z);
-        NewBlock.GetComponent<Renderer>().material = WorldMats[1];
+        NewBlock.GetComponent<Renderer>().material = PlayerMat;
     }
-
-    // Use this for initialization
-    void Start () {
-        AddData();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        UpdateHpBar();
-        UpdateManaBar();
-        DrawBlocksV3();
-
-        // right now the world has a like idk 2k block lim to help make rpg stuff
-        // Also uped the draw dis so that people would not have to walk around!
-        // Mega Amp = more/less hills
-      /*  if (BlockData.Count < 500 * (AddedDataCount))
+    public void RemoveBlock(GameObject BlockThatIsRemoved)
+    {
+        BlockData.Remove(BlockThatIsRemoved.transform.position);
+        if (LoadedBlocks.Contains(BlockThatIsRemoved))
         {
-            // make more data
-            MinX = 500 * (AddedDataCount);
-            MinZ = 500 * (AddedDataCount);
-            MaxX += MaxX;
-            MaxZ += MaxZ;
-            AddData();
+            // kill it
+            LoadedBlocks.Remove(BlockThatIsRemoved);
+            
         }
-        */
+    }
+    public void SwitchBlock(int BlockID)
+    {
+        PlayerMat = WorldMats[BlockID];
+        PlayerSelMat.sprite = WorldUI[BlockID];
+        //Debug.Log("Switched to BLOCK_ID:" + BlockID);
+    }
+    public bool AddThingToInv(string Thing)
+    {
+
+        // later we need to update UI here
+
+        if (Inv.Count < InvMax)
+        {
+            Inv.Add(Thing);
+            return true; // this takes the thing from world
+        }
+        else
+        {
+            Debug.LogError("INV ERROR: player is out of room!");
+            return false;
+        }
+        
+    }
+    public void UpdateCraftingScreen(string Place)
+    {
+        if (Inv.Count != 0)
+        {
+            //Debug.Log("I WAS CALLED!");
+            // this is a call from a UI button the location of that button is located some whare on the screen
+            // thus the Place string Place could = MidLeft Mid Mid Mid Right and so on this is used in finding where to put the UI element from the inv to the grid
+            // now we are going to pop up the inv and fill it with stuff
+            //1st we pull up the inv
+            UIGos[0].SetActive(true);
+            // next lets show the correct button...
+            // UIGos[10] = Item Prefab
+            for (int i = 0; i < Inv.Count; i++)
+            {
+                // make a new button!
+                GameObject Button = GameObject.Instantiate(UIItemPreFab, UIItemPreFab.transform.parent);
+                Button.GetComponent<Image>().enabled = true;
+                Button.GetComponentInChildren<Text>().enabled = true;
+                Button.GetComponent<Button>().enabled = true;
+                Button.GetComponentInChildren<Text>().text = Inv[i];
+                Button.name = Inv[i];
+                string thing = Inv[i];
+                Button.GetComponent<Button>().onClick.AddListener(delegate { AddToCrafting(thing); });
+                //Button.GetComponent<RectTransform>().transform.position = new Vector3(XValue, YValue, 0);
+                Button.transform.position = new Vector3(UIItemPreFab.transform.position.x + (75 * i), UIItemPreFab.transform.position.y, UIItemPreFab.transform.position.z);
+                ActiveButtons.Add(Button);
+                //new Vector3(XValue, YValue, 0);
+                //Button.GetComponent<RectTransform>().transform.position = new Vector3(XValue, YValue, 0);
+                // for now no pics...
+            }
+            LastActiveButton = Place;
+            if (Place == "BotLeft")
+            {
+                UIGos[1].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+                SetActiveAllButtons(false);
+                UIGos[1].SetActive(true); // locks it to that button
+            }
+            if (Place == "BotMid")
+            {
+                UIGos[2].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+                SetActiveAllButtons(false);
+                UIGos[2].SetActive(true); // locks it to that button
+            }
+            if (Place == "BotRight")
+            {
+                UIGos[3].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+                SetActiveAllButtons(false);
+                UIGos[3].SetActive(true); // locks it to that button
+            }
+            if (Place == "MidLeft")
+            {
+                UIGos[4].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+                SetActiveAllButtons(false);
+                UIGos[4].SetActive(true); // locks it to that button
+            }
+            if (Place == "MidMid")
+            {
+                UIGos[5].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+                SetActiveAllButtons(false);
+                UIGos[5].SetActive(true); // locks it to that button
+            }
+            if (Place == "MidRight")
+            {
+                UIGos[6].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+                SetActiveAllButtons(false);
+                UIGos[6].SetActive(true); // locks it to that button
+            }
+            if (Place == "TopLeft")
+            {
+                UIGos[7].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+                SetActiveAllButtons(false);
+                UIGos[7].SetActive(true); // locks it to that button
+            }
+            if (Place == "TopMid")
+            {
+                UIGos[8].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+                SetActiveAllButtons(false);
+                UIGos[8].SetActive(true); // locks it to that button
+            }
+            if (Place == "TopRight")
+            {
+                UIGos[9].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+                SetActiveAllButtons(false);
+                UIGos[9].SetActive(true); // locks it to that button
+            }
+        }
+        else
+        {
+            Debug.LogError("Player tryed to craft with nothing in inv");
+        }
+    }
+    public void AddToCrafting(string Thing)
+    {
+        // remove it from inv and find the button that is still active
+        Inv.Remove(Thing);
+        // but put it's text in the place of button
+        for (int i = 0; i < ActiveButtons.Count; i++)
+        {
+            GameObject.Destroy(ActiveButtons[i]);
+        }
+        if (LastActiveButton == "BotLeft")
+        {
+            UIGos[1].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+            UIGos[1].GetComponentInChildren<Text>().text = Thing;
+            SetActiveAllButtons(true);
+            // clean up!
+            // we need to distroy the current obj
+            GameObject NewUI = GameObject.Instantiate(UIGos[0],UIGos[0].transform.parent);
+            UIGos[0].name = "REMOVED";
+            GameObject.Destroy(UIGos[0]);
+            UIGos[0] = NewUI;
+            
+
+        }
+        if (LastActiveButton == "BotMid")
+        {
+            UIGos[2].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+            UIGos[2].GetComponentInChildren<Text>().text = Thing;
+            SetActiveAllButtons(true);
+            // clean up!
+            // we need to distroy the current obj
+            GameObject NewUI = GameObject.Instantiate(UIGos[0], UIGos[0].transform.parent);
+            GameObject.Destroy(UIGos[0]);
+            UIGos[0] = NewUI;
+          //  NewUI.SetActive(false);
+        }
+        if (LastActiveButton == "BotRight")
+        {
+            UIGos[3].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+            UIGos[3].GetComponentInChildren<Text>().text = Thing;
+            SetActiveAllButtons(true);
+            // clean up!
+            // we need to distroy the current obj
+            GameObject NewUI = GameObject.Instantiate(UIGos[0], UIGos[0].transform.parent);
+            GameObject.Destroy(UIGos[0]);
+            UIGos[0] = NewUI;
+            //NewUI.SetActive(false);
+        }
+        if (LastActiveButton == "MidLeft")
+        {
+            UIGos[4].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+            UIGos[4].GetComponentInChildren<Text>().text = Thing;
+            SetActiveAllButtons(true);
+            // clean up!
+            // we need to distroy the current obj
+            GameObject NewUI = GameObject.Instantiate(UIGos[0], UIGos[0].transform.parent);
+            GameObject.Destroy(UIGos[0]);
+            UIGos[0] = NewUI;
+          //  NewUI.SetActive(false);
+        }
+        if (LastActiveButton == "MidMid")
+        {
+            UIGos[5].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+            UIGos[5].GetComponentInChildren<Text>().text = Thing;
+            SetActiveAllButtons(true);
+            // clean up!
+            // we need to distroy the current obj
+            GameObject NewUI = GameObject.Instantiate(UIGos[0], UIGos[0].transform.parent);
+            GameObject.Destroy(UIGos[0]);
+            UIGos[0] = NewUI;
+           // NewUI.SetActive(false);
+        }
+        if (LastActiveButton == "MidRight")
+        {
+            UIGos[6].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+            UIGos[6].GetComponentInChildren<Text>().text = Thing;
+            SetActiveAllButtons(true);
+            // clean up!
+            // we need to distroy the current obj
+            GameObject NewUI = GameObject.Instantiate(UIGos[0], UIGos[0].transform.parent);
+            GameObject.Destroy(UIGos[0]);
+            UIGos[0] = NewUI;
+           // NewUI.SetActive(false);
+        }
+        if (LastActiveButton == "TopLeft")
+        {
+            UIGos[7].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+            UIGos[7].GetComponentInChildren<Text>().text = Thing;
+            SetActiveAllButtons(true);
+            // clean up!
+            // we need to distroy the current obj
+            GameObject NewUI = GameObject.Instantiate(UIGos[0], UIGos[0].transform.parent);
+            GameObject.Destroy(UIGos[0]);
+            UIGos[0] = NewUI;
+           // NewUI.SetActive(false);
+        }
+        if (LastActiveButton == "TopMid")
+        {
+            UIGos[8].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+            UIGos[8].GetComponentInChildren<Text>().text = Thing;
+            SetActiveAllButtons(true);
+            // clean up!
+            // we need to distroy the current obj
+            GameObject NewUI = GameObject.Instantiate(UIGos[0], UIGos[0].transform.parent);
+            GameObject.Destroy(UIGos[0]);
+            UIGos[0] = NewUI;
+            //NewUI.SetActive(false);
+        }
+        if (LastActiveButton == "TopRight")
+        {
+            UIGos[9].GetComponent<Image>().color = new Color(0, 100, 0, 1);
+            UIGos[9].GetComponentInChildren<Text>().text = Thing;
+            SetActiveAllButtons(true);
+            // clean up!
+            // we need to distroy the current obj
+            GameObject NewUI = GameObject.Instantiate(UIGos[0], UIGos[0].transform.parent);
+            GameObject.Destroy(UIGos[0]);
+            UIGos[0] = NewUI;
+            
+        }
+        
+        UIItemPreFab = UIGos[0].transform.GetChild(0).GetChild(0).GetChild(0).gameObject;
+        
+        UIGos[0].SetActive(false);
+    }
+    public void CheckAndCraft()
+    {
+        if (Inv.Count != InvMax)
+        {
+            if (
+                //                    Compressed Grass Block                     \\
+                   UIGos[1].transform.GetChild(0).GetComponent<Text>().text == "Grass"
+                && UIGos[2].transform.GetChild(0).GetComponent<Text>().text == "Grass"
+                && UIGos[3].transform.GetChild(0).GetComponent<Text>().text == "Grass"
+                && UIGos[4].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[5].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[6].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[7].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[8].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[9].transform.GetChild(0).GetComponent<Text>().text == ""
+                )
+
+            {
+                ClearCraftingBg();
+                Inv.Add("Compressed Grass Block");
+
+            }
+            if (
+                   //                    Compressed Grass Block                     \\
+                   UIGos[1].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[2].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[3].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[4].transform.GetChild(0).GetComponent<Text>().text == "Grass"
+                && UIGos[5].transform.GetChild(0).GetComponent<Text>().text == "Grass"
+                && UIGos[6].transform.GetChild(0).GetComponent<Text>().text == "Grass"
+                && UIGos[7].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[8].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[9].transform.GetChild(0).GetComponent<Text>().text == ""
+                )
+
+            {
+                ClearCraftingBg();
+                Inv.Add("Compressed Grass Block");
+
+            }
+            if (
+                   //                    Compressed Grass Block                     \\
+                   UIGos[1].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[2].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[3].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[4].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[5].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[6].transform.GetChild(0).GetComponent<Text>().text == ""
+                && UIGos[7].transform.GetChild(0).GetComponent<Text>().text == "Grass"
+                && UIGos[8].transform.GetChild(0).GetComponent<Text>().text == "Grass"
+                && UIGos[9].transform.GetChild(0).GetComponent<Text>().text == "Grass"
+                )
+
+            {
+                ClearCraftingBg();
+                Inv.Add("Compressed Grass Block");
+
+            }
+        }
+        else
+        {
+            Debug.LogError("Player tryed to craft with a full screen!");
+        }
     }
 }
